@@ -10,16 +10,18 @@ const authorSchema = new mongoose.Schema({
         require: true
     },
     title: {
-        require: true,
+        type: String,
+        required: true,
         enum: ["Mr", "Mrs", "Miss"]
     },
-    email: {
-        require: true,
+    email: { 
+        type: String,
+        required: true,
         match: /.+\@.+\..+/,
         unique: true
     },
-    password: { mandatory }
+    password: { type: String , required: true }
 }, { timestamps: true });
 
-module.exports.Schema = mongoose.Model('author', authorSchema)
+module.exports = mongoose.model('author', authorSchema)
 

@@ -1,9 +1,9 @@
-const model = require("../models/authorModel")
-const author = async function(req, res){
+const authorModel = require("../models/authorModel")
+const createAuthor = async function(req, res){
     try{
     let data = req.body
     if(data){
-    let savedData = await model.create(data)
+    let savedData = await authorModel.create(data)
     res.status(201).send({msg:savedData})
     } else 
     res.status(400).send({msg: "Bad Request"})
@@ -13,4 +13,4 @@ catch(error){
 }
 }
 
-module.exports.author = author;
+module.exports.createAuthor = createAuthor;
