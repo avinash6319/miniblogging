@@ -57,6 +57,8 @@ let createAuthor = async function (req, res) {
     try {
         const email = req.body.email
         const password = req.body.password
+
+        
         if (!valid.isValid(email)) {
             return res.status(400).send({ status: false, msg: "pls provide email" })
 
