@@ -146,16 +146,62 @@ const updateBlog = async function (req, res) {
 
         res.status(200).send({status:true,msg:"blog updated successfuly",data:savedData})
     }else{
-        
+
         return res.status(404).send({status:false,msg:"blog id does not exist "})
     }
 
     } catch (error) {
         return res.status(500).send({status:false,msg:error.message})
 
-    }
+    }}
 
 
+    // deleteBlog by  path Parem
+    //=================================================================
+    const deleteBlog = async function (req,res) {
+    
+        try{
+            let blogId =req.params.blogId
+            let deleteBlog=await blogModel.findByIdAndUpdate({_id:blogId},{$set:{isDeleted:true}},{new: true})
+            res.status(200).send({status:true, msg: deleteBlog})
+            if(!deleteBlog) res.status(404).send({status:false, msg:"Blogs are not found"})
+        }
+        catch(error){res.status(500).send({msg:error})
+        console.log({msg: error})
+    }};
+    
 
-}
-module.exports={createBlog,blogDetails,updateBlog}
+    // ***************delete by query paramas *********************8
+
+    const deleteByQuery= async function(req,res){
+        try
+           {  
+            const data=req.query 
+          const {category, authorId, tags, subcategory,isPublished}=data
+          if(Object.keys(data).length==0){
+           return res.status(400).send({status:false,msg:"no data is provided"})
+          }
+          if(isPublished==true){
+           return res.status(400).send({status:false,msg:"blog is published"})
+          }
+       
+          const deletedBlogs=await blogModel.findOneAndUpdate(
+           data,
+          {isDeleted:true,deletedAt:new Date()},
+          {new:true}
+           )
+           if(!deletedBlogs){
+               return res.status(404).send({status:false,msg:"blog not found"})
+           }
+           return res.status(200).send({status:true,msg:deletedBlogs})
+       }
+       catch(error){
+           return res.status(500).send({status:false,msg:error.message})
+       }
+       }
+
+
+   
+
+
+module.exports= {createBlog,blogDetails,updateBlog,deleteBlog,deleteByQuery}

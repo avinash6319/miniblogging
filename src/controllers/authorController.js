@@ -1,5 +1,6 @@
 let authorModel = require("../models/authorModel")
 let valid = require("../validator/validator")
+const jwt= require("jsonwebtoken")
 
 
 let createAuthor = async function (req, res) {
@@ -50,5 +51,40 @@ let createAuthor = async function (req, res) {
     }
 }
 
+ //    **************************login api *************************
+
+ const login = async function (req, res) {
+    try {
+        const email = req.body.email
+        const password = req.body.password
+        if (!valid.isValid(email)) {
+            return res.status(400).send({ status: false, msg: "pls provide email" })
+
+        }
+
+        if (!valid.isValid(password)) {
+            return res.status(400).send({ status: false, msg: "pls provide password" })
+
+        }
+
+        if (email && password) {
+            const author = await authorModel.findOne({ email: email, password: password })
+            if (author) {
+               const token = jwt.sign({ author: author._id },'nasa')
+                return res.status(200).send({ status: true, token: token })
+            }
+            else {
+                return res.status(500).send({ status: false, msg: "invalid credentials" })
+            }
+        }
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, msg: err.msg })
+    }
+}
+   
+
+
 
 module.exports.createAuthor = createAuthor
+module.exports.login=login
