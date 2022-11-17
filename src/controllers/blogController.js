@@ -71,9 +71,7 @@ const blogDetails = async function (req, res) {
         const blogsData = await blogModel.find({ isDeleted: false }, { isPublished: true })
         if (req.query) {
             let { authorId, tags, category, subCategory } = req.query
-            // let tags = req.query.tags
-            // let category = req.query.category
-            // let subCategory = req.query.subCategory
+           
             let obj = {}
             if (authorId) {
                 obj.authorId = authorId

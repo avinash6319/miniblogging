@@ -10,7 +10,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 mongoose.connect("mongodb+srv://AbhijitRadke:7768916626@cluster0.v76zsxi.mongodb.net/adb", {
     useNewUrlParser: true
 })
-    .then(() => console.log("Monfoose is connected"))
+    .then(() => console.log("Mongoose is connected"))
     .catch(err => console.log(err));
 
 
