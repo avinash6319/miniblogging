@@ -7,16 +7,19 @@ let createAuthor = async function (req, res) {
     let Data = req.body
     const { fname, lname, title, email, password } = Data
     const isEmailAlreadyused = await authorModel.findOne({ email: email })
-    const objKey = Object.keys(Data).length
+
     try {
 
         //-----------------------Data in body || not-------------------------------
+        if (!valid.isValidRequestBody(Data)) {
+            return res.status(400).send({ status: false, msg: " Pls Provide Authordata" })
+        }
 
-        if (objKey === 0) { return res.satus(400).send({ status: false, msg: "No Data in requestBody" }) }
+        // if (objKey === 0) { return res.satus(400).send({ status: false, msg: "No Data in requestBody" }) }
 
         //----------------------- validation-------------------------------
 
-        else if (!valid.isValidName(fname)) { return res.status(400).send({ status: false, msg: "fname is required" }) }
+        if (!valid.isValidName(fname)) { return res.status(400).send({ status: false, msg: "fname is required" }) }
 
         else if (!valid.isValidName(lname)) { return res.status(400).send({ status: false, msg: "Lname is required" }) }
 
