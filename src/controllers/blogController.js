@@ -71,7 +71,10 @@ const blogDetails = async function (req, res) {
         const blogsData = await blogModel.find({ isDeleted: false }, { isPublished: true })
         if (req.query) {
             let { authorId, tags, category, subCategory } = req.query
+<<<<<<< HEAD
            
+=======
+>>>>>>> 7d975917050da90db016ae4592da1b5209c5adc6
             let obj = {}
             if (authorId) {
                 obj.authorId = authorId
@@ -112,40 +115,21 @@ const updateBlog = async function (req, res) {
 
     try {
         const blogId = req.params.blogId
-        const checkId = await blogModel.findById(blogId)
-        if (checkId) {
-            const requestBody = req.body
-            const { title, body, tags, subcategory, isPublished } = requestBody
-            if (!Valid.isValidRequestBody(requestBody)) {
-                return res.status(400).send({ status: false, msg: " Pls Provide requestBody" })
-            }
-            if (!Valid.isValid(title)) {
-                return res.status(400).send({ status: false, msg: " Pls Provide title for blog" })
-            }
-            if (!Valid.isValid(body)) {
-                return res.status(400).send({ status: false, msg: "Body is Mandtory" })
-            }
-            if (!Valid.isValid(tags)) {
-                return res.status(400).send({ status: false, msg: "Pls provide tags of blog" })
-            }
-            if (!Valid.isValid(subcategory)) {
-                return res.status(400).send({ status: false, msg: "Pls provide subCategory of blog" })
-            }
-            if (!Valid.isValid(isPublished)) {
-                return res.status(400).send({ status: false, msg: "Pls provide  blog is published or not " })
-            }
+        if (!isValidObjectId(blogId)) return res.status(400).send({ status: false, msg: "blog Id is incurrct" })
 
-            let savedData = await blogModel.findOneAndUpdate({ _id: blogId }, {
-                $set: { "title": req.body.title, "body": req.body.body, "category": req.body.category },
-                $push: { "tags": req.body.tags, "subcategory": req.body.subcategory }
-            }
-                , { new: true })
+        const requestBody = req.body
 
-            res.status(200).send({ status: true, msg: "blog updated successfuly", data: savedData })
-        } else {
+        if (Object.keys(requestBody).length == 0) return res.status(400).send({ status: false, msg: "Enter a felds to update" })
 
-            return res.status(404).send({ status: false, msg: "blog id does not exist " })
-        }
+        const { title, body, tags, subcategory, category, isPublished } = requestBody
+
+        let savedData = await blogModel.findOneAndUpdate({ _id: blogId }, {
+            $set: { title: title, body: body, category: category, isPublished: isPublished },
+            $push: { tags: tags, subcategory: subcategory }
+        }, { new: true })
+
+        res.status(200).send({ status: true, msg: "blog updated successfuly", data: savedData })
+
 
     } catch (error) {
         return res.status(500).send({ status: false, msg: error.message })
@@ -154,21 +138,6 @@ const updateBlog = async function (req, res) {
 }
 
 
-// // deleteBlog by  path Parem
-// // =================================================================
-// const deleteBlog = async function (req, res) {
-
-//     try {
-//         let blogId = req.params.blogId
-//         let deleteBlog = await blogModel.findByIdAndUpdate({ authorId: blogId }, { $set: { isDeleted: true } }, { new: true })
-//         res.status(200).send({ status: true, msg: deleteBlog })
-//         if (!deleteBlog) res.status(404).send({ status: false, msg: "Blogs are not found" })
-//     }
-//     catch (error) {
-//         res.status(500).send({ msg: error.message })
-//         console.log({ msg: error })
-//     }
-// };
 
 
 // deleteBlog by ID path Parem
@@ -190,28 +159,82 @@ const deleteBlog = async (req, res) => {
 
 // ***************delete by query paramas *********************8
 
-const deleteByQuery = async function (req, res) {
-    try {
-        const data = req.query
-        //   const {category, authorId, tags, subcategory,isPublished}=data
-        if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, msg: "no data is provided" })
-        }
-        if (isPublished == true) {
-            return res.status(400).send({ status: false, msg: "blog is published" })
-        }
+// const deleteByQuery = async function (req, res) {
+//     try {
+//         const data = req.query
+//         // const { isPublished } = data
+//         if (Object.keys(data).length == 0) {
+//             return res.status(400).send({ status: false, msg: "no data is provided" })
+//         }
+//         // if (isPublished == true) {
+//         //     return res.status(400).send({ status: false, msg: "blog is published" })
+//         // }
 
-        const deletedBlogs = await blogModel.findOneAndUpdate(data, { isDeleted: true, deletedAt: new Date() }, { new: true })
+//         const deletedBlogs = await blogModel.updateMany(data, { isDeleted: true, deletedAt: new Date() }, { new: true })
+//         console.log(deleteBlog)
+//         if (!deletedBlogs) {
+//             return res.status(404).send({ status: false, msg: "blog not found" })
+//         }
+//         return res.status(200).send({ status: true, msg: deletedBlogs })
+//     }
+//     catch (error) {
+//         return res.status(500).send({ status: false, msg: error.message })
+//     }
+// }
 
-        if (!deletedBlogs) {
-            return res.status(404).send({ status: false, msg: "blog not found" })
-        }
-        return res.status(200).send({ status: true, msg: deletedBlogs })
-    }
-    catch (error) {
-        return res.status(500).send({ status: false, msg: error.message })
-    }
-}
+// const deleteByQuery = async function (req, res) {
+//     try {
+//         let queryData = (req.query.category || req.query.authorId || req.query.tags || req.query.subCategory)
+//         console.log(queryData)
+//         if (!queryData) {
+//             return res.status(404).send({ status: false, msg: "You can only Delete blog  by category, authorid, tag name, subcategory name,or unpublished  blog" })
+//         } else {
+
+//             let authorId = req.query.authorId
+//             let category = req.query.category
+//             let tags = req.query.tags
+//             let subCategory = req.query.subCategory
+//             let isPublished = req.query.isPublished
+
+//             let obj = {};
+//             if (authorId) {
+//                 obj.authorId = authorId;
+//             }
+//             if (category) {
+//                 obj.category = category
+//             }
+
+//             if (tags) {
+//                 obj.tags = tags
+//             }
+//             if (subCategory) {
+//                 obj.subcategory = subCategory
+//             }
+//             if (isPublished) {
+//                 obj.isPublished = isPublished
+//             }
+
+
+//             let data = await blogModel.findOne(obj);
+
+//             if (!data) {
+//                 return res.status(404).send({ status: false, msg: "The given data is Invalid or blog is already deleted" });
+//             }
+
+
+//             await blogModel.updateOne({ data }, { isDeleted: true, deletedAt: Date.now() }, { new: true })
+//             return res.status(200).send({ status: true, msg: "Blog Deleted succesfully", })
+//         }
+//     }
+
+
+//     catch (error) {
+//         return res.status(500).send({ message: "Failed", error: error.message });
+//     }
+// }
+
+
+
 
 
 
