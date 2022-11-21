@@ -1,25 +1,17 @@
 const express = require('express');
-
-
 const router = express.Router();
 const authorController = require("../controllers/authorController")
-const blogController = require("../controllers/blogController")
-const middleware = require("../middleware/auth")
+const blogController=require("../controllers/blogController")
+const MW = require("../middleware/auth")
 
+router.post("/authors",authorController.createAuthor)
+router.post("/login",authorController.login)
+router.post("/blogs",MW.authentication,blogController.createBlog)
+router.get("/blogs",MW.authentication,blogController.getBlog)
+router.put("/blogs/:blogId",MW.authentication,MW.authorisation,blogController.updateBlog)
+router.delete("/blogs/:blogId",MW.authentication,MW.authorisation,blogController.deleteBlog)
+router.delete("/blogs",MW.authentication,blogController.deleteByQuery)
 
-router.post("/authors", authorController.createAuthor)
-
-router.post("/blogs", blogController.createBlog)
-
-router.get("/blogs", blogController.blogDetails)
-
-router.put("/blogs/:blogId", middleware.Authentication, blogController.updateBlog)
-
-router.delete("/blogs/:blogId", middleware.Authentication, middleware.Authorisation, blogController.deleteBlog)
-
-router.delete("/blogs", blogController.deleteByQuery)
-
-router.post("/login", authorController.login)
 
 
 module.exports = router;

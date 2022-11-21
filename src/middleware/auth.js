@@ -1,60 +1,46 @@
-const jwt = require('jsonwebtoken')
-const blogModel = require('../models/blogModel')
-const mongoose = require("mongoose")
-const { isValidObjectId } = mongoose
+let jwt = require("jsonwebtoken")
+let blogModel = require("../models/blogModel")
+let  mongoose = require("mongoose")
 
 
-
-
-const Authentication = async (req, res, next) => {
+//=========== authentication ==================================
+const authentication = function (req, res, next) {
     try {
-        const token = req.headers['x-api-key']
-        if (!token) {
-            return res.status(401).send({ status: false, msg: 'missing authentication token in request' })
-        }
-        let decoded = jwt.verify(token, 'nasa')
-        req.authorId = decoded.authorId
-        console.log(decoded)
-
-        if (!decoded) {
-            return res.status(401).send({ status: false, message: "Invalid authentication token in request" })
-        }
-        next()
-    }
-    catch (err) {
-        return res.status(500).send({ status: false, msg: err.message })
-    }
-}
-
-
-
-
-const Authorisation = async function (req, res, Next) {
-
-    try {
-        
-        const blogId = req.params.blogId
-        console.log(req.params)
-        if (!isValidObjectId(blogId)) return res.status(400).send({ status: false, msg: "blog Id is incurrct" })
-
-        let findAuthorId = await blogModel.findById(blogId).select({ authorId: 1,})
-
-        console.log(findAuthorId)
-        if (!findAuthorId)
-            return res.status(404).send({ status: false, msg: "blog not found" })
-
         let token = req.headers["x-api-key"];
-        let decodedToken = jwt.verify(token, "nasa");
-        console.log(decodedToken)
-        let userLoggedIn = decodedToken.authorId
+        if (!token) return res.status(401).send({ status: false, msg: " token must be present for authentication " })
 
-        //authorId comparision to check if the logged-in user is requesting for their own data
-        if (findAuthorId.authorId != userLoggedIn) return res.status(403).send({ status: false, msg: 'User is not allowed to modify the blog data' });
-        Next()
-    }
-    catch (err) {
-        return res.status(500).send({ status: false, msgp: err.message })
+        jwt.verify(token, "BlogProject", function (err, decodedToken) {
+            if (err) {
+                return res.status(400).send({ status: false, msg: "token invalid" });
+            } 
+        
+                req.decodedToken = decodedToken
+                next() 
+        })
+    } catch (err) {
+        res.status(500).send({ status: false, msg: err.message })
     }
 }
-module.exports.Authentication = Authentication
-module.exports.Authorisation = Authorisation
+
+//=========================authorisation ======================================================
+
+const authorisation = async function (req, res, next) {
+    try{
+        
+        let blogId = req.params.blogId
+        let authorLoggedIn = req.decodedToken.authorId
+        let findBlog = await blogModel.findById(blogId)
+        if(!findBlog)
+        {return res.status(404).send("status:false, msg:Author's blog not found")}
+        let authorId = findBlog.authorId
+        if (!authorId === authorLoggedIn)
+            return res.status(403).send({ stauts: false, msg: "User and user's-token in not matched" })
+        next()
+     }
+    catch(error) {
+        return res.status(500).send({ status: false, msg: error.message});
+    }
+    };
+
+module.exports.authorisation = authorisation
+module.exports.authentication = authentication
